@@ -459,6 +459,27 @@ class FitToPageWidthSmartCommand : public Command {
 	}
 };
 
+class ToggleFitToPageWidthCommand : public Command {
+	void perform(MainWidget* widget) {
+		int current_page = widget->get_current_page_number();
+		// Toggle between normal and smart fit
+		if (widget->last_smart_fit_page.has_value() && widget->last_smart_fit_page.value() == current_page) {
+			// Currently in smart mode, switch to normal
+			widget->main_document_view->fit_to_page_width(false);
+			widget->last_smart_fit_page = {};
+		}
+		else {
+			// Currently in normal mode or different page, switch to smart
+			widget->main_document_view->fit_to_page_width(true);
+			widget->last_smart_fit_page = current_page;
+		}
+	}
+
+	std::string get_name() {
+		return "toggle_fit_to_page_width";
+	}
+};
+
 class FitToPageHeightCommand : public Command {
 	void perform(MainWidget* widget) {
 		widget->main_document_view->fit_to_page_height();
@@ -2207,6 +2228,7 @@ CommandManager::CommandManager(ConfigManager* config_manager) {
 	new_commands["fit_to_page_height"] = []() {return std::make_unique< FitToPageHeightCommand>(); };
 	new_commands["fit_to_page_height_smart"] = []() {return std::make_unique< FitToPageHeightSmartCommand>(); };
 	new_commands["fit_to_page_width_smart"] = []() {return std::make_unique< FitToPageWidthSmartCommand>(); };
+	new_commands["toggle_fit_to_page_width"] = []() {return std::make_unique< ToggleFitToPageWidthCommand>(); };
 	new_commands["next_page"] = []() {return std::make_unique< NextPageCommand>(); };
 	new_commands["previous_page"] = []() {return std::make_unique< PreviousPageCommand>(); };
 	new_commands["open_document"] = []() {return std::make_unique< OpenDocumentCommand>(); };
